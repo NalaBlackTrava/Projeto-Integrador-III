@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Notas Escolares</title>
+  <style>
+    :root {
+      --fundo: #fff6d1;
+      --translucido: rgba(255, 255, 255, 0.4);
+      --borda: rgba(255, 255, 255, 0.3);
+      --sombra: rgba(0, 0, 0, 0.1);
+      --fonte-titulo: 'Arial Black', sans-serif;
+      --fonte-corpo: 'Helvetica', sans-serif;
+      --barra: #0077ff;
+      --barra-turma: #fbc02d;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: var(--fonte-corpo);
+    }
+    body {
+      background-color: var(--fundo);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container {
+      width: 100%;
+      max-width: 1200px;
+    }
+    header {
+      font-family: var(--fonte-titulo);
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    .dashboard {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+      align-items: flex-start;
+    }
+    .main-content {
+      flex: 3;
+      min-width: 350px;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+    .notificacoes-lateral {
+      flex: 1;
+      min-width: 290px;
+      max-width: 350px;
+      height: calc(100vh - 5rem);
+      position: sticky;
+      top: 2rem;
+      right: 0;
+      background: var(--translucido);
+      border-radius: 18px;
+      border: 1.5px solid #ffe082;
+      box-shadow: 0 2px 12px rgba(251,192,45,0.10);
+      padding: 2.2rem 1.5rem 2rem 1.5rem;
+      margin-left: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+    }
+    .notificacoes-lateral h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1.3rem;
+      color: #b28704;
+      font-family: var(--fonte-titulo);
+    }
+    .notificacoes-lateral ul {
+      list-style: none;
+      padding-left: 0.5rem;
+      width: 100%;
+    }
+    .notificacoes-lateral li {
+      margin-bottom: 1.1rem;
+      font-size: 1.03rem;
+      word-break: break-word;
+    }
+    .card {
+      background: var(--translucido);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--borda);
+      border-radius: 16px;
+      padding: 2.2rem 2rem 2rem 2rem;
+      box-shadow: 0 4px 10px var(--sombra);
+      flex: 1;
+      min-width: 320px;
+      margin-bottom: 2.2rem;
+      margin-top: 1.2rem;
+    }
+    .card h2 {
+      font-family: var(--fonte-titulo);
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+    .card ul, .card p, .card label, .card .materias-obrig, .card .materias-opc {
+      margin-bottom: 1.1rem;
+    }
+    .card ul li {
+      margin-bottom: 0.7rem;
+    }
+    .lista-alunos, .notificacoes, .grafico, .porcentagens, .materias {
+      font-size: 0.95rem;
+    }
+    .lista-alunos ul, .notificacoes ul, .materias ul {
+      list-style: none;
+      padding-left: 1rem;
+    }
+    .grafico .barra, .porcentagens .barra {
+      margin-bottom: 0.5rem;
+      height: 22px;
+      background: #eee;
+      border-radius: 10px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+    .grafico .barra span, .porcentagens .barra span {
+      display: block;
+      height: 100%;
+      border-radius: 10px;
+      background: var(--barra);
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 1;
+    }
+    .grafico .barra label, .porcentagens .barra label {
+      position: relative;
+      z-index: 2;
+      padding-left: 10px;
+      color: #222;
+      font-size: 0.97rem;
+    }
+    .porcentagens .barra span {
+      background: var(--barra-turma);
+    }
+    .materias-obrig, .materias-opc {
+      margin-bottom: 1rem;
+    }
+    .materias-obrig h3, .materias-opc h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+    }
+    .materias-obrig ul, .materias-opc ul {
+      margin-bottom: 0.5rem;
+    }
+    .login-window {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      width: 90%;
+      max-width: 400px;
+      margin: 40px auto;
+    }
+    .login-window label {
+      display: block;
+      margin-top: 1rem;
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+    }
+    .login-window input, .login-window select, .login-window button {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .login-window button {
+      background-color: #fdd835;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    .grafico-linha {
+      width: 100%;
+      height: 340px;
+      margin-top: 2.2rem;
+      margin-bottom: 2.2rem;
+      background: #f7f7f7;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      flex-direction: column;
+      padding: 1.2rem 0.5rem 1.5rem 0.5rem;
+    }
+    .grafico-linha svg {
+      width: 100%;
+      height: 300px;
+      display: block;
+    }
+    .grafico-linha-controls {
+      width: 100%;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      justify-content: flex-end;
+      margin-bottom: 1.2rem;
+      padding-right: 1.5rem;
+    }
+    .grafico-linha-controls select,
+    .grafico-linha-controls label {
+      margin-right: 1.2rem;
+    }
+    button, .btn {
+      background: linear-gradient(90deg, #fbc02d 60%, #ffd54f 100%);
+      color: #333;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 22px;
+      font-size: 1em;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      margin-left: 0.7rem;
+      margin-top: 0.2rem;
+      margin-bottom: 0.2rem;
+      outline: none;
+    }
+    button:hover, .btn:hover {
+      background: linear-gradient(90deg, #ffd54f 60%, #fbc02d 100%);
+      box-shadow: 0 4px 16px rgba(251,192,45,0.13);
+      color: #222;
+    }
+    .sol-revisao-list {
+      margin-top: 1.5rem;
+      background: var(--translucido);
+      border-radius: 10px;
+      padding: 1.2rem 1rem;
+      border: 1px solid #ffe082;
+      box-shadow: 0 2px 8px rgba(251,192,45,0.07);
+    }
+    .sol-revisao-list h3 {
+      font-size: 1.08rem;
+      margin-bottom: 1rem;
+      color: #b28704;
+      font-weight: bold;
+    }
+    .sol-revisao-list ul {
+      margin-left: 0.5rem;
+    }
+    .sol-revisao-list li {
+      margin-bottom: 0.7rem;
+      font-size: 0.97rem;
+    }
+    @media (max-width: 1200px) {
+      .dashboard {
+        flex-direction: column;
+      }
+      .notificacoes-lateral {
+        position: static;
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        margin-top: 2rem;
+        min-width: 0;
+      }
+    }
+    @media (max-width: 900px) {
+      .dashboard {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .main-content {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="mainContainer" style="display:none;">
+    <button id="btnVoltar" style="margin-bottom:1rem; padding:0.5rem 1.2rem; border-radius:8px; border:none; background:#fbc02d; font-weight:bold; cursor:pointer;">Voltar à Home</button>
+    <header id="headerTitle"></header>
+    <div class="dashboard">
+      <div class="main-content" id="mainContent"></div>
+      <aside class="notificacoes-lateral" id="notificacoesLateral" style="display:none;">
+        <h2 id="notificacoesTitulo">Notificações</h2>
+        <ul id="notificacoesAluno"></ul>
+        <div id="solicitacoesRevisaoDocente"></div>
+      </aside>
+    </div>
+  </div>
+  <div class="login-window" id="loginScreen">
+    <h1>Login</h1>
+    <label for="type">Você é:</label>
+    <select id="userType">
+      <option value="aluno">Estudante</option>
+      <option value="professor">Docente</option>
+    </select>
+    <label for="id">Número de Identificação</label>
+    <input type="text" id="userId">
+    <label for="senha">Senha</label>
+    <input type="password" id="password">
+    <button onclick="login()">Entrar</button>
+  </div>
+  <footer style="width:100%;background:#fff8dc;border-top:1px solid #eee;text-align:center;padding:1rem 0;font-size:1rem;color:#555;position:fixed;left:0;bottom:0;z-index:10;">
+    © sistema pertencente ao trabalho 'Tecnologia e Educação: Uma Plataforma Digital para Transparência e
+    Gestão Escolar' para o Projeto Integrador III, UNIVESP 2025
+  </footer>
+  <script>
+    // Banco de dados simulado
+    const materiasObrigatorias = [
+      "Língua Portuguesa", "Matemática", "Biologia", "Física", "Química",
+      "História", "Geografia", "Inglês", "Educação Física", "Artes", "Sociologia", "Filosofia"
+    ];
+    const materiasOpcionais = [
+      "Projeto de Vida", "Robótica", "Programação", "Educação Financeira",
+      "Teatro", "Música", "Empreendedorismo", "Espanhol", "Astronomia", "Cinema"
+    ];
+    // 8 turmas
+    const turmas = [
+      { nome: "1EMC", id: "1EMC" },
+      { nome: "2EMF", id: "2EMF" },
+      { nome: "3EMA", id: "3EMA" },
+      { nome: "1EMB", id: "1EMB" },
+      { nome: "2EMA", id: "2EMA" },
+      { nome: "3EMB", id: "3EMB" },
+      { nome: "1EMA", id: "1EMA" },
+      { nome: "2EMC", id: "2EMC" }
+    ];
+    // 50 alunos distribuídos nas turmas
+    const nomesBase = [
+      "João Pedro", "Luana Silva", "Rafael Lima", "Ana Beatriz", "Thiago Nunes", "Paula Ramos", "Marcos Souza", "Lúcia Alves",
+      "Pedro Henrique", "Camila Torres", "Lucas Martins", "Fernanda Dias", "Bruno Costa", "Juliana Rocha", "Gabriel Pinto",
+      "Mariana Lopes", "Vinícius Freitas", "Patrícia Gomes", "Eduardo Silva", "Isabela Castro", "Rodrigo Alves", "Larissa Mendes",
+      "Felipe Souza", "Amanda Lima", "Ricardo Pires", "Beatriz Santos", "Matheus Cardoso", "Sofia Barbosa", "Henrique Dias",
+      "Carolina Farias", "Daniel Rocha", "Aline Souza", "Bruna Martins", "Carlos Eduardo", "Débora Lima", "Elisa Ramos",
+      "Fábio Nogueira", "Gustavo Teixeira", "Helena Duarte", "Igor Almeida", "Jéssica Moura", "Kauã Ribeiro", "Letícia Barros",
+      "Marcelo Tavares", "Natália Cunha", "Otávio Pires", "Priscila Lopes", "Renan Costa", "Sabrina Torres", "Tatiane Silva"
+    ];
+    // Gera 50 alunos com dados variados
+    const alunos = Array.from({length: 50}, (_, i) => {
+      const turma = turmas[i % turmas.length].id;
+      const nome = nomesBase[i % nomesBase.length];
+      const notas = Array.from({length: 6}, () => +(Math.random()*5+5).toFixed(1)); // notas entre 5.0 e 10.0
+      const materias = materiasObrigatorias.slice(0, 3 + (i % 3));
+      const opcionais = [materiasOpcionais[i % materiasOpcionais.length]];
+      return {
+        id: `a${(i+1).toString().padStart(2,"0")}`,
+        nome,
+        turma,
+        notas,
+        materias,
+        opcionais
+      };
+    });
+    // 8 professores
+    const professores = [
+      { id: "p01", nome: "Carla", materia: "Biologia", turmas: ["2EMF", "3EMA", "1EMA"] },
+      { id: "p02", nome: "Carolina", materia: "Matemática", turmas: ["1EMC", "1EMB", "2EMC"] },
+      { id: "p03", nome: "Roberto", materia: "História", turmas: ["2EMA", "3EMA", "3EMB"] },
+      { id: "p04", nome: "Fernanda", materia: "Física", turmas: ["1EMC", "2EMF", "3EMB"] },
+      { id: "p05", nome: "Paulo", materia: "Química", turmas: ["1EMB", "2EMA", "2EMC"] },
+      { id: "p06", nome: "Julio", materia: "Geografia", turmas: ["3EMA", "3EMB", "1EMA"] },
+      { id: "p07", nome: "Simone", materia: "Inglês", turmas: ["1EMC", "2EMC", "2EMF"] },
+      { id: "p08", nome: "Patrícia", materia: "Artes", turmas: ["1EMB", "3EMA", "1EMA"] }
+    ];
+
+    // Simula notas mensais (jan a mai) para cada aluno
+    const meses = ["Jan", "Fev", "Mar", "Abr", "Mai"];
+    alunos.forEach(aluno => {
+      aluno.notasMensais = meses.map(() =>
+        +(Math.random()*5+5).toFixed(2)
+      );
+    });
+
+    // Notificações dinâmicas por aluno
+    let notificacoesAluno = [];
+    // Solicitações de revisão globais (para professores)
+    let solicitacoesRevisao = [];
+
+    function login() {
+      const userType = document.getElementById('userType').value;
+      const userId = document.getElementById('userId').value.trim();
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainContainer').style.display = 'block';
+      if (userType === 'aluno') {
+        const aluno = alunos.find(a => a.id === userId) || alunos[0];
+        renderAlunoDashboard(aluno);
+      } else {
+        const prof = professores.find(p => p.id === userId) || professores[0];
+        renderProfessorDashboard(prof);
+      }
+    }
+
+    function renderAlunoDashboard(aluno) {
+      document.getElementById('headerTitle').textContent = `🧑‍🎓 Estudante: ${aluno.nome}`;
+      // Notificação automática de recuperação
+      notificacoesAluno = notificacoesAluno.filter(n => !n.startsWith("⚠️ Recuperação"));
+      if (aluno.notas.some(n => n < 6)) {
+        notificacoesAluno.unshift("⚠️ Recuperação: Você possui nota(s) abaixo de 6. Procure seu professor.");
+      }
+      // Conteúdo principal
+      const mainContent = document.getElementById('mainContent');
+      mainContent.innerHTML = `
+        <div class="card card-notas">
+          <h2>Notas</h2>
+          <ul id="listaNotasAluno">
+            ${aluno.notas.map((nota, i) => `
+              <li>
+                <span>${materiasObrigatorias[i % materiasObrigatorias.length]}:</span>
+                <b>${nota}</b>
+                <button class="btn" onclick="solicitarRevisao('${aluno.id}',${i})">Solicitar Revisão</button>
+              </li>
+            `).join("")}
+          </ul>
+        </div>
+        <div class="card materias">
+          <div class="materias-obrig">
+            <h3>Matérias Obrigatórias</h3>
+            <ul>${aluno.materias.map(m => `<li>${m}</li>`).join("")}</ul>
+          </div>
+          <div class="materias-opc">
+            <h3>Opcionais</h3>
+            <ul>${aluno.opcionais.map(m => `<li>${m}</li>`).join("")}</ul>
+          </div>
+        </div>
+      `;
+      // Notificações na lateral
+      const notifAside = document.getElementById('notificacoesLateral');
+      notifAside.style.display = "flex";
+      document.getElementById('notificacoesTitulo').textContent = "Notificações";
+      document.getElementById('solicitacoesRevisaoDocente').innerHTML = "";
+      const notifUl = document.getElementById('notificacoesAluno');
+      notifUl.innerHTML = notificacoesAluno.length
+        ? notificacoesAluno.map(n => `<li>${n}</li>`).join("")
+        : `<li>🔔 Você será avisado(a) em caso de recuperação e poderá se inscrever pelo sistema.</li>`;
+      renderGraficoLinhaAluno(aluno);
+    }
+
+    // Função global para ser chamada pelo botão
+    window.solicitarRevisao = function(alunoId, notaIdx) {
+      const aluno = alunos.find(a => a.id === alunoId);
+      const materia = materiasObrigatorias[notaIdx % materiasObrigatorias.length];
+      const msg = `📢 Revisão solicitada para ${materia}. Aguarde retorno do professor.`;
+      // Evita notificações duplicadas para a mesma matéria
+      if (!notificacoesAluno.includes(msg)) {
+        notificacoesAluno.push(msg);
+        // Adiciona solicitação global para professores
+        solicitacoesRevisao.push({
+          aluno: aluno.nome,
+          turma: aluno.turma,
+          materia: materia,
+          data: new Date().toLocaleString("pt-BR")
+        });
+        renderAlunoDashboard(aluno);
+      }
+    };
+
+    function renderGraficoLinhaAluno(aluno) {
+      // Insere o gráfico acima das notas
+      const mainContent = document.getElementById('mainContent');
+      const graficoDiv = document.createElement('div');
+      graficoDiv.className = "grafico-linha";
+      graficoDiv.id = "graficoAluno";
+      graficoDiv.innerHTML = `
+        <div class="grafico-linha-controls">
+          <span style="font-weight:bold;">Variação de notas (Jan-Mai):</span>
+        </div>
+        ${gerarGraficoLinha(meses, aluno.notasMensais, "Notas do aluno")}
+      `;
+      mainContent.insertBefore(graficoDiv, mainContent.firstChild);
+    }
+
+    function renderProfessorDashboard(prof) {
+      document.getElementById('headerTitle').textContent = `👩‍🏫 Docente: ${prof.nome}`;
+      // Conteúdo principal
+      const mainContent = document.getElementById('mainContent');
+      // Solicitações de revisão das turmas do docente
+      const solRevisaoProf = solicitacoesRevisao.filter(s => prof.turmas.includes(s.turma));
+      // Alunes das turmas do docente
+      const alunesPorTurma = prof.turmas.map(turmaId => {
+        const alunes = alunos.filter(a => a.turma === turmaId);
+        return {
+          turma: turmaId,
+          alunes
+        };
+      });
+      // Médias por turma
+      const medias = {};
+      prof.turmas.forEach(turma => {
+        const alunesDaTurma = alunos.filter(a => a.turma === turma);
+        const media = alunesDaTurma.length ? (alunesDaTurma.reduce((acc, a) => acc + (a.notas.reduce((s, n) => s + n, 0) / a.notas.length), 0) / alunesDaTurma.length) : 0;
+        medias[turma] = media.toFixed(1);
+      });
+
+      document.getElementById('mainContent').innerHTML = `
+        <div class="card">
+          <h2>Turmas</h2>
+          <ul>
+            ${prof.turmas.map(t => `<li>${t} (Média: <b>${medias[t]}</b>)</li>`).join("")}
+          </ul>
+        </div>
+        <div class="grafico-linha" id="graficoProf">
+          <div class="grafico-linha-controls">
+            <label>
+              <input type="radio" name="graficoTipo" value="turmas" checked> Por Turma
+            </label>
+            <label>
+              <input type="radio" name="graficoTipo" value="alunos"> Por Alune da Turma
+            </label>
+            <select id="selectTurma" style="display:none; margin-left:1rem;">
+              ${prof.turmas.map(t => `<option value="${t}">${t}</option>`).join("")}
+            </select>
+          </div>
+          <div id="graficoProfSvg"></div>
+        </div>
+        <div class="card lista-alunos">
+          <h2>Alunes das suas turmas</h2>
+          <ul>
+            ${alunesPorTurma.map(t =>
+              `<li><b>${t.turma}:</b>
+                <ul>
+                  ${t.alunes.map(a =>
+                    `<li>${a.nome} - Notas: ${a.notas.map(n => `<span style="margin-right:0.5em;">${n}</span>`).join("")} | Média: <b>${(a.notas.reduce((s, n) => s + n, 0) / a.notas.length).toFixed(1)}</b></li>`
+                  ).join("")}
+                </ul>
+              </li>`
+            ).join("")}
+          </ul>
+        </div>
+        <div class="card materias">
+          <div class="materias-obrig">
+            <h3>Matérias Obrigatórias</h3>
+            <ul>${materiasObrigatorias.map(m => `<li>${m}</li>`).join("")}</ul>
+          </div>
+          <div class="materias-opc">
+            <h3>Opcionais</h3>
+            <ul>${materiasOpcionais.map(m => `<li>${m}</li>`).join("")}</ul>
+          </div>
+        </div>
+      `;
+      // Notificações e solicitações na lateral para docente
+      const notifAside = document.getElementById('notificacoesLateral');
+      notifAside.style.display = "flex";
+      document.getElementById('notificacoesTitulo').textContent = "Notificações e Solicitações";
+      // Notificações do docente (exemplo: quantidade de solicitações)
+      const notifUl = document.getElementById('notificacoesAluno');
+      notifUl.innerHTML = solRevisaoProf.length
+        ? [`<li>📢 Você possui ${solRevisaoProf.length} solicitaç${solRevisaoProf.length > 1 ? 'ões' : 'ão'} de revisão pendente(s).</li>`].join("")
+        : `<li>Sem novas notificações.</li>`;
+      // Lista de solicitações detalhadas
+      document.getElementById('solicitacoesRevisaoDocente').innerHTML = `
+        <div class="sol-revisao-list" style="margin-top:2rem;">
+          <h3>Solicitações de Revisão de Notas</h3>
+          <ul>
+            ${
+              solRevisaoProf.length
+                ? solRevisaoProf.map(s =>
+                  `<li><b>${s.aluno}</b> (${s.turma}) - ${s.materia} <span style="color:#888;font-size:0.92em;">(${s.data})</span></li>`
+                ).join("")
+                : "<li>Nenhuma solicitação no momento.</li>"
+            }
+          </ul>
+        </div>
+      `;
+      renderGraficoLinhaProf(prof);
+      // Eventos dos controles do gráfico
+      document.querySelectorAll('input[name="graficoTipo"]').forEach(radio => {
+        radio.onchange = () => {
+          const tipo = document.querySelector('input[name="graficoTipo"]:checked').value;
+          document.getElementById('selectTurma').style.display = tipo === "alunos" ? "inline-block" : "none";
+          renderGraficoLinhaProf(prof);
+        };
+      });
+      document.getElementById('selectTurma').onchange = () => renderGraficoLinhaProf(prof);
+    }
+
+    function renderGraficoLinhaProf(prof) {
+      const tipo = document.querySelector('input[name="graficoTipo"]:checked').value;
+      const svgDiv = document.getElementById('graficoProfSvg');
+      if (tipo === "turmas") {
+        // Média mensal das turmas do professor
+        const series = prof.turmas.map(turmaId => {
+          const alunosDaTurma = alunos.filter(a => a.turma === turmaId);
+          // Média mensal da turma
+          const mediasMensais = meses.map((_, i) => {
+            if (!alunosDaTurma.length) return 0;
+            return +(alunosDaTurma.reduce((acc, a) => acc + a.notasMensais[i], 0) / alunosDaTurma.length).toFixed(2);
+          });
+          return { label: turmaId, values: mediasMensais };
+        });
+        svgDiv.innerHTML = gerarGraficoLinhaMulti(meses, series, "Média das turmas");
+      } else {
+        // Médias mensais dos alunos de uma turma selecionada
+        const turmaId = document.getElementById('selectTurma').value;
+        const alunosDaTurma = alunos.filter(a => a.turma === turmaId);
+        const series = alunosDaTurma.map(a => ({
+          label: a.nome.split(" ")[0],
+          values: a.notasMensais
+        }));
+        svgDiv.innerHTML = gerarGraficoLinhaMulti(meses, series, "Alunos da turma " + turmaId);
+      }
+    }
+
+    // Gráfico de linha para múltiplas séries (turmas ou alunos)
+    function gerarGraficoLinhaMulti(labels, series, titulo) {
+      if (!series.length) return "<div style='color:#888'>Sem dados para gráfico</div>";
+      const w = Math.max(500, labels.length * 100);
+      const h = 260;
+      const padding = 40;
+      const max = 10;
+      const min = 0;
+      const stepX = (w - 2 * padding) / (labels.length - 1 || 1);
+      const stepY = (h - 2 * padding) / (max - min);
+      const cores = ["#0077ff", "#fbc02d", "#e57373", "#43a047", "#8e24aa", "#ff9800", "#00bcd4", "#cddc39", "#d84315", "#3949ab"];
+
+      // Linhas de grade e eixos
+      let grid = "";
+      for (let i = 0; i <= 5; i++) {
+        const y = h - padding - i * (stepY * 2);
+        grid += `<line x1="${padding}" y1="${y}" x2="${w-padding}" y2="${y}" stroke="#eee" />`;
+        grid += `<text x="8" y="${y+5}" fill="#888" font-size="0.85rem">${(min + i*2).toFixed(1)}</text>`;
+      }
+      // Labels dos meses
+      let xlabels = "";
+      labels.forEach((label, i) => {
+        const x = padding + i * stepX;
+        xlabels += `<text x="${x}" y="${h-padding+22}" font-size="0.95rem" fill="#888" text-anchor="middle">${label}</text>`;
+      });
+
+      // Linhas e pontos das séries
+      let polylines = "";
+      let legendas = "";
+      series.forEach((serie, idx) => {
+        const color = cores[idx % cores.length];
+        const points = serie.values.map((v, i) => {
+          const x = padding + i * stepX;
+          const y = h - padding - (v - min) * stepY;
+          return `${x},${y}`;
+        }).join(" ");
+        polylines += `<polyline fill="none" stroke="${color}" stroke-width="2.5" points="${points}" />`;
+        polylines += serie.values.map((v, i) => {
+          const x = padding + i * stepX;
+          const y = h - padding - (v - min) * stepY;
+          return `<circle cx="${x}" cy="${y}" r="4" fill="${color}"/>`;
+        }).join("");
+        legendas += `<rect x="${padding + idx*110}" y="10" width="16" height="8" fill="${color}"/><text x="${padding + idx*110 + 20}" y="18" font-size="0.9rem" fill="#333">${serie.label}</text>`;
+      });
+
+      return `
+        <svg width="${w}" height="${h}">
+          <text x="${w/2}" y="32" font-size="1.1rem" fill="#222" text-anchor="middle" font-weight="bold">${titulo}</text>
+          ${grid}
+          ${xlabels}
+          ${polylines}
+          ${legendas}
+        </svg>
+      `;
+    }
+
+    // Gráfico de linha simples para aluno
+    function gerarGraficoLinha(labels, values, titulo) {
+      if (!values.length) return "<div style='color:#888'>Sem dados para gráfico</div>";
+      const w = Math.max(500, labels.length * 100);
+      const h = 260;
+      const padding = 40;
+      const max = 10;
+      const min = 0;
+      const stepX = (w - 2 * padding) / (labels.length - 1 || 1);
+      const stepY = (h - 2 * padding) / (max - min);
+
+      // Linhas de grade e eixos
+      let grid = "";
+      for (let i = 0; i <= 5; i++) {
+        const y = h - padding - i * (stepY * 2);
+        grid += `<line x1="${padding}" y1="${y}" x2="${w-padding}" y2="${y}" stroke="#eee" />`;
+        grid += `<text x="8" y="${y+5}" fill="#888" font-size="0.85rem">${(min + i*2).toFixed(1)}</text>`;
+      }
+      // Labels dos meses
+      let xlabels = "";
+      labels.forEach((label, i) => {
+        const x = padding + i * stepX;
+        xlabels += `<text x="${x}" y="${h-padding+22}" font-size="0.95rem" fill="#888" text-anchor="middle">${label}</text>`;
+      });
+
+      // Linha e pontos
+      const points = values.map((v, i) => {
+        const x = padding + i * stepX;
+        const y = h - padding - (v - min) * stepY;
+        return `${x},${y}`;
+      }).join(" ");
+      const circles = values.map((v, i) => {
+        const x = padding + i * stepX;
+        const y = h - padding - (v - min) * stepY;
+        return `<circle cx="${x}" cy="${y}" r="4" fill="#0077ff"/>`;
+      }).join("");
+
+      return `
+        <svg width="${w}" height="${h}">
+          <text x="${w/2}" y="32" font-size="1.1rem" fill="#222" text-anchor="middle" font-weight="bold">${titulo}</text>
+          ${grid}
+          ${xlabels}
+          <polyline fill="none" stroke="#0077ff" stroke-width="2.5" points="${points}" />
+          ${circles}
+        </svg>
+      `;
+    }
+
+    // Botão voltar à home
+    document.getElementById('btnVoltar').onclick = function() {
+      document.getElementById('mainContainer').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'block';
+      document.getElementById('userId').value = '';
+      document.getElementById('password').value = '';
+    };
+  </script>
+</body>
+</html>

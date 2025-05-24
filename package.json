@@ -1,0 +1,7 @@
+{
+  "name": "pi-iii",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "node server/index.js"
+  }
+}
